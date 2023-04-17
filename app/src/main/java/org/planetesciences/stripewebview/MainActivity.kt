@@ -4,8 +4,6 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.webkit.JavascriptInterface
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import org.planetesciences.stripewebview.databinding.ActivityMainBinding
@@ -24,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(view)
 
         binding.webview.settings.javaScriptEnabled = true
-        binding.webview.addJavascriptInterface(WebViewJavaScriptInterface(), "app")
+        binding.webview.addJavascriptInterface(WebViewJavaScriptInterface(this@MainActivity), "app")
         val url = prefs.getString("start_url", null)
         if(url != null) {
             binding.webview.loadUrl(url)
@@ -42,7 +40,7 @@ class MainActivity : AppCompatActivity() {
                     val url = barcode.url?.url
                     if(url != null) {
                         AlertDialog.Builder(this)
-                            .setMessage("Définir %s comme url de démarrage ?".format(url))
+                            .setMessage("Définir \"%s\" comme url de démarrage ?".format(url))
                             .setPositiveButton("Oui") { _, _ ->
                                 prefs.edit().putString("start_url", url).commit()
                                 finish();
@@ -52,13 +50,6 @@ class MainActivity : AppCompatActivity() {
                             .show()
                     }
                 }
-        }
-    }
-
-    inner class WebViewJavaScriptInterface {
-        @JavascriptInterface
-        fun makeToast(message: String?, lengthLong: Boolean) {
-            Toast.makeText(this@MainActivity, message, if (lengthLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
         }
     }
 }

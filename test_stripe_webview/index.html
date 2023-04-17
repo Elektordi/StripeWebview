@@ -24,6 +24,20 @@
             return false;
         }
 
+        function testStripe(){
+             if (typeof app === 'undefined') {
+                alert("Outside android!");
+                return false;
+             }
+
+            app.initStripe("tml_zzzzz", "get_token");
+            return false;
+        }
+
+        function get_token(){
+            return "pst_test_aaaaa";
+        }
+
         /* 
             Call the 'showToast' method when the form gets 
             submitted (by pressing button or return key on keyboard). 
@@ -31,6 +45,8 @@
         window.onload = function(){
             var form = document.getElementById("form");
             form.onsubmit = showToast;
+            var form2 = document.getElementById("form_stripe");
+            form2.onsubmit = testStripe;
         }
     </script>
 </head>
@@ -44,6 +60,9 @@
     <input type="submit" value="Make Toast" />
 </form>
 
+<form id="form_stripe">
+    <input type="submit" value="Test Stripe" />
+</form>
 </body>
 </html>
 

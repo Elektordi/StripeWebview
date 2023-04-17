@@ -1,9 +1,12 @@
 package org.planetesciences.stripewebview
 
+import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import org.planetesciences.stripewebview.databinding.ActivityMainBinding
@@ -64,5 +67,16 @@ class MainActivity : AppCompatActivity() {
                 .show()
             true
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        this.requestPermissions(arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.BLUETOOTH_SCAN
+        ), 1)
     }
 }

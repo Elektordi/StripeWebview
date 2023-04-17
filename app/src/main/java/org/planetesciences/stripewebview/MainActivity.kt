@@ -10,8 +10,8 @@ import org.planetesciences.stripewebview.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var prefs: SharedPreferences
+    lateinit var binding: ActivityMainBinding
+    lateinit var prefs: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         prefs = getSharedPreferences(packageName + "_preferences", Context.MODE_PRIVATE)
@@ -37,12 +37,12 @@ class MainActivity : AppCompatActivity() {
             val scanner = GmsBarcodeScanning.getClient(this)
             scanner.startScan()
                 .addOnSuccessListener { barcode ->
-                    val url = barcode.url?.url
-                    if(url != null) {
+                    val newUrl = barcode.url?.url
+                    if(newUrl != null) {
                         AlertDialog.Builder(this)
-                            .setMessage("Définir \"%s\" comme url de démarrage ?".format(url))
+                            .setMessage("Définir \"%s\" comme url de démarrage ?".format(newUrl))
                             .setPositiveButton("Oui") { _, _ ->
-                                prefs.edit().putString("start_url", url).commit()
+                                prefs.edit().putString("start_url", newUrl).commit()
                                 finish();
                                 startActivity(intent);
                             }
@@ -50,6 +50,19 @@ class MainActivity : AppCompatActivity() {
                             .show()
                     }
                 }
+        }
+
+        binding.settings.setOnLongClickListener {
+            AlertDialog.Builder(this)
+                .setMessage("Effacer url de démarrage ?")
+                .setPositiveButton("Oui") { _, _ ->
+                    prefs.edit().remove("start_url").commit()
+                    finish();
+                    startActivity(intent);
+                }
+                .setNegativeButton("Non", null)
+                .show()
+            true
         }
     }
 }

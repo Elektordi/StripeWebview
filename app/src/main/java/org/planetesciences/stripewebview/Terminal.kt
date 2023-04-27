@@ -158,4 +158,73 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
             }
         )
     }
+
+    fun startPayment(amount: Long, uid: String, callbackJsFunction: String) {
+        if(connectedreader == null) {
+            status("Terminal non connecté !")
+            return
+        }
+
+        val params = PaymentIntentParameters.Builder()
+            .setAmount(amount)
+            .setCurrency("eur")
+            .setDescription(uid)
+            .build()
+        getInstance().createPaymentIntent(params, object: PaymentIntentCallback {
+            override fun onSuccess(paymentIntent: PaymentIntent) {
+                cancelable = getInstance().collectPaymentMethod(paymentIntent,
+                    object : PaymentIntentCallback {
+                        override fun onSuccess(paymentIntent: PaymentIntent) {
+
+                            getInstance().processPayment(paymentIntent, object : PaymentIntentCallback {
+                                override fun onSuccess(paymentIntent: PaymentIntent) {
+                                    activity.runOnUiThread {
+                                        var data = paymentIntent.id
+                                        if(paymentIntent.getCharges().isNotEmpty()) data = paymentIntent.getCharges()[0].id
+                                        Log.i(LOG_TAG, "processPayment success! $data")
+                                        activity.binding.webview.evaluateJavascript("$callbackJsFunction('$uid', '$data')") {}
+                                    }
+                                }
+
+                                override fun onFailure(exception: TerminalException) {
+                                    Log.w(LOG_TAG,"processPayment failed!", exception)
+                                }
+                            } )
+                        }
+
+                        override fun onFailure(exception: TerminalException) {
+                            Log.w(LOG_TAG,"collectPaymentMethod failed!", exception)
+                            getInstance().cancelPaymentIntent(paymentIntent, object : PaymentIntentCallback {
+                                override fun onFailure(e: TerminalException) {
+                                    Log.w(LOG_TAG,"cancelPaymentIntent failed!", exception)
+                                }
+
+                                override fun onSuccess(paymentIntent: PaymentIntent) {
+                                    Log.i(LOG_TAG,"cancelPaymentIntent success!")
+                                }
+                            })
+                        }
+                    })
+            }
+
+            override fun onFailure(exception: TerminalException) {
+                Log.w(LOG_TAG,"createPaymentIntent failed!", exception)
+                status("Impossible de créer le paiement.")
+            }
+        })
+
+    }
+
+    fun cancelPayment() {
+        if(cancelable == null) return
+        if(cancelable!!.isCompleted) return
+        cancelable!!.cancel(object : Callback {
+            override fun onFailure(e: TerminalException) {
+                Log.w(LOG_TAG,"cancel failed!", e)
+            }
+            override fun onSuccess() {
+                Log.i(LOG_TAG,"cancel success.")
+            }
+        })
+    }
 }

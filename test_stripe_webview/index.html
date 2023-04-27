@@ -8,34 +8,33 @@
         function showToast(){
             var message = document.getElementById("message").value;
             var lengthLong = document.getElementById("length").checked;
-
-            /* 
-                Call the 'makeToast' method in the Java code. 
-                'app' is specified in MainActivity.java when 
-                adding the JavaScript interface. 
-             */
              
-             if (typeof app === 'undefined') {
+            if (typeof app === 'undefined') {
                 alert("Outside android!");
                 return false;
-             }
+            }
              
             app.makeToast(message, lengthLong);
             return false;
         }
 
         function testStripe(){
-             if (typeof app === 'undefined') {
-                alert("Outside android!");
-                return false;
-             }
-
-            app.initStripe("tml_zzzzz", "get_token");
+            app.initStripe("tml_xxx", "get_token");
+            return false;
+        }
+        
+        function testPay(){
+            app.startPayment(4200, "test_"+Date.now(), "callback");
             return false;
         }
 
         function get_token(){
-            return "pst_test_aaaaa";
+            return "pst_test_yyy_zzz";
+        }
+        
+        function callback(uid, data){
+            document.getElementById("pay_callback").innerHTML = data;
+            app.makeToast(data, true);
         }
 
         /* 
@@ -47,12 +46,13 @@
             form.onsubmit = showToast;
             var form2 = document.getElementById("form_stripe");
             form2.onsubmit = testStripe;
+            var form3 = document.getElementById("form_pay");
+            form3.onsubmit = testPay;
         }
     </script>
 </head>
 
 <body>
-
 <form id="form">
     Message: <input id="message" name="message" type="text"/><br />
     Long: <input id="length" name="length" type="checkbox" /><br />
@@ -62,6 +62,11 @@
 
 <form id="form_stripe">
     <input type="submit" value="Test Stripe" />
+</form>
+
+<form id="form_pay">
+    <input type="submit" value="Test Pay" />
+    <p id="pay_callback">...</p>
 </form>
 </body>
 </html>

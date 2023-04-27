@@ -2,6 +2,7 @@ package org.planetesciences.stripewebview
 
 import android.webkit.JavascriptInterface
 import android.widget.Toast
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 
 class WebViewJavaScriptInterface(private var activity: MainActivity) {
     var terminal: Terminal? = null
@@ -31,4 +32,16 @@ class WebViewJavaScriptInterface(private var activity: MainActivity) {
         terminal!!.cancelPayment()
     }
 
+    @JavascriptInterface
+    fun scanQrCode(callback_js_function: String) {
+        if(callback_js_function == "") return
+        val scanner = GmsBarcodeScanning.getClient(activity)
+        scanner.startScan()
+            .addOnSuccessListener { barcode ->
+                val data = barcode.rawValue!!.replace("'", "\'")
+                activity.runOnUiThread {
+                    activity.binding.webview.evaluateJavascript("$callback_js_function('$data')") {}
+                }
+            }
+    }
 }

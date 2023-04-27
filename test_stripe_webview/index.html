@@ -24,7 +24,12 @@
         }
         
         function testPay(){
-            app.startPayment(4200, "test_"+Date.now(), "callback");
+            app.startPayment(4200, "test_"+Date.now(), "callback_pay");
+            return false;
+        }
+
+        function testScan(){
+            app.scanQrCode("callback_scan");
             return false;
         }
 
@@ -32,8 +37,13 @@
             return "pst_test_yyy_zzz";
         }
         
-        function callback(uid, data){
+        function callback_pay(uid, data){
             document.getElementById("pay_callback").innerHTML = data;
+            app.makeToast(data, true);
+        }
+        
+        function callback_scan(data){
+            document.getElementById("scan_callback").innerHTML = data;
             app.makeToast(data, true);
         }
 
@@ -48,6 +58,8 @@
             form2.onsubmit = testStripe;
             var form3 = document.getElementById("form_pay");
             form3.onsubmit = testPay;
+            var form4 = document.getElementById("form_scan");
+            form4.onsubmit = testScan;
         }
     </script>
 </head>
@@ -68,6 +80,12 @@
     <input type="submit" value="Test Pay" />
     <p id="pay_callback">...</p>
 </form>
+
+<form id="form_scan">
+    <input type="submit" value="Test Scan" />
+    <p id="scan_callback">...</p>
+</form>
+
 </body>
 </html>
 

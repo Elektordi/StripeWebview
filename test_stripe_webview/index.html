@@ -28,6 +28,11 @@
             return false;
         }
 
+        function testCancel(){
+            app.cancelPayment();
+            return false;
+        }
+
         function testScan(){
             app.scanQrCode("callback_scan");
             return false;
@@ -58,8 +63,10 @@
             form2.onsubmit = testStripe;
             var form3 = document.getElementById("form_pay");
             form3.onsubmit = testPay;
-            var form4 = document.getElementById("form_scan");
-            form4.onsubmit = testScan;
+            var form4 = document.getElementById("form_cancel");
+            form4.onsubmit = testCancel;
+            var form5 = document.getElementById("form_scan");
+            form5.onsubmit = testScan;
         }
     </script>
 </head>
@@ -73,12 +80,16 @@
 </form>
 
 <form id="form_stripe">
-    <input type="submit" value="Test Stripe" />
+    <input type="submit" value="Test Init Stripe" />
 </form>
 
 <form id="form_pay">
     <input type="submit" value="Test Pay" />
     <p id="pay_callback">...</p>
+</form>
+
+<form id="form_cancel">
+    <input type="submit" value="Test Cancel Pay" />
 </form>
 
 <form id="form_scan">

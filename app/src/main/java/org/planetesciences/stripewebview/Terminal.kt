@@ -8,7 +8,7 @@ import com.stripe.stripeterminal.external.models.*
 import com.stripe.stripeterminal.log.LogLevel
 
 const val LOG_TAG = "Terminal"
-const val SIMULATED = true
+const val SIMULATED = false
 
 class Terminal(var activity: MainActivity, var location: String, var token_js_function: String) {
 
@@ -103,7 +103,7 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
 
             search = getInstance().discoverReaders(config, object : DiscoveryListener {
                 override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
-                    var filteredReaders = readers.filter { r -> r.deviceType.deviceName == "bbpos_wisepad3"}
+                    val filteredReaders = readers.filter { r -> r.deviceType.deviceName == "bbpos_wisepad3"}
 
                     activity.runOnUiThread {
                         if(dialog != null) dialog!!.dismiss()
@@ -130,6 +130,7 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
 
                 override fun onFailure(e: TerminalException) {
                     Log.e(LOG_TAG, "StripeTerminal discoverReaders Failure", e)
+                    status("Échec de la recherche des terminaux !")
                 }
             })
         } catch (e: Exception) {
@@ -153,7 +154,7 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
 
                 override fun onFailure(e: TerminalException) {
                     Log.e(LOG_TAG, "connectBluetoothReader failure", e)
-                    status("Connect failed: %s".format(e.message))
+                    status("Échec connexion: %s".format(e.message))
                 }
             }
         )
@@ -186,17 +187,17 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
                                     }
                                 }
 
-                                override fun onFailure(exception: TerminalException) {
-                                    Log.w(LOG_TAG,"processPayment failed!", exception)
+                                override fun onFailure(e: TerminalException) {
+                                    Log.w(LOG_TAG,"processPayment failed!", e)
                                 }
                             } )
                         }
 
-                        override fun onFailure(exception: TerminalException) {
-                            Log.w(LOG_TAG,"collectPaymentMethod failed!", exception)
+                        override fun onFailure(e: TerminalException) {
+                            Log.w(LOG_TAG,"collectPaymentMethod failed!", e)
                             getInstance().cancelPaymentIntent(paymentIntent, object : PaymentIntentCallback {
                                 override fun onFailure(e: TerminalException) {
-                                    Log.w(LOG_TAG,"cancelPaymentIntent failed!", exception)
+                                    Log.w(LOG_TAG,"cancelPaymentIntent failed!", e)
                                 }
 
                                 override fun onSuccess(paymentIntent: PaymentIntent) {
@@ -207,8 +208,8 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
                     })
             }
 
-            override fun onFailure(exception: TerminalException) {
-                Log.w(LOG_TAG,"createPaymentIntent failed!", exception)
+            override fun onFailure(e: TerminalException) {
+                Log.w(LOG_TAG,"createPaymentIntent failed!", e)
                 status("Impossible de créer le paiement.")
             }
         })

@@ -1,5 +1,6 @@
 package org.planetesciences.stripewebview
 
+import android.view.View
 import android.webkit.JavascriptInterface
 import android.widget.Toast
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
@@ -17,6 +18,9 @@ class WebViewJavaScriptInterface(private var activity: MainActivity) {
         if(location == "" || token_js_function == "") return
         terminal = Terminal(activity, location, token_js_function)
         terminal!!.init()
+        activity.runOnUiThread {
+            activity.binding.settings.visibility = View.GONE
+        }
     }
 
     @JavascriptInterface

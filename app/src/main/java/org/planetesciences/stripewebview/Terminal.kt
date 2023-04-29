@@ -15,16 +15,23 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
     private var search: Cancelable? = null
     private var connectedreader: Reader? = null
     private var cancelable: Cancelable? = null
+    private var tokenCallback: ConnectionTokenCallback? = null
 
     private val tokenProvider = object : ConnectionTokenProvider {
         override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
             activity.runOnUiThread {
-                activity.binding.webview.evaluateJavascript("$token_js_function()") {
-                    if (it != null) callback.onSuccess(it.trim('"'))
-                    else callback.onFailure(ConnectionTokenException("Token is null"))
-                }
+                Log.i(LOG_TAG, "Requesting token.")
+                tokenCallback = callback
+                activity.binding.webview.evaluateJavascript("$token_js_function()") {}
             }
         }
+    }
+
+    fun pushToken(token: String) {
+        if(tokenCallback == null) return
+        Log.i(LOG_TAG, "Got token: $token")
+        if (token != "ERROR") tokenCallback!!.onSuccess(token.trim('"'))
+        else tokenCallback!!.onFailure(ConnectionTokenException("Unable to get token."))
     }
 
     private val listener = object : TerminalListener {

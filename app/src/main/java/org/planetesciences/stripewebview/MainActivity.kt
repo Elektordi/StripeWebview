@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.webkit.WebChromeClient
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
@@ -25,7 +26,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(view)
 
         binding.webview.settings.javaScriptEnabled = true
+        binding.webview.settings.domStorageEnabled = true
         binding.webview.addJavascriptInterface(WebViewJavaScriptInterface(this@MainActivity), "app")
+        binding.webview.webChromeClient = WebChromeClient()
         val url = prefs.getString("start_url", null)
         if(url != null) {
             binding.webview.loadUrl(url)

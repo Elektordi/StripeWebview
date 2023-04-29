@@ -24,6 +24,12 @@ class WebViewJavaScriptInterface(private var activity: MainActivity) {
     }
 
     @JavascriptInterface
+    fun pushToken(token: String) {
+        if(terminal == null) return
+        terminal!!.pushToken(token)
+    }
+
+    @JavascriptInterface
     fun startPayment(amount: Int, uid: String, callback_js_function: String) {
         if(amount == 0 || uid == "" || callback_js_function == "") return
         if(terminal == null) return

@@ -100,16 +100,21 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
             )
 
             var dialog: AlertDialog? = null
-
+            status("Recherche de terminaux en cours")
             search = getInstance().discoverReaders(config, object : DiscoveryListener {
                 override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
                     val filteredReaders = readers.filter { r -> r.deviceType.deviceName == "bbpos_wisepad3"}
 
                     activity.runOnUiThread {
                         if(dialog != null) dialog!!.dismiss()
+                        val last = activity.prefs.getString("last_terminal", null)
                         dialog = AlertDialog.Builder(activity)
                             .setTitle("Connexion terminal")
-                            .setItems(filteredReaders.map { r -> r.serialNumber }.toTypedArray()) { _, which ->
+                            .setItems(filteredReaders.map { r ->
+                                var s = r.serialNumber
+                                if(s == last) s += " (dernier utilisé)"
+                                s
+                            }.toTypedArray()) { _, which ->
                                 connect(filteredReaders[which])
                             }
                             .setNegativeButton("Annuler") { _, _ ->
@@ -150,6 +155,7 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
                 override fun onSuccess(reader: Reader) {
                     connectedreader = reader
                     status("Terminal connecté !")
+                    activity.prefs.edit().putString("last_terminal", reader.serialNumber).apply()
                 }
 
                 override fun onFailure(e: TerminalException) {

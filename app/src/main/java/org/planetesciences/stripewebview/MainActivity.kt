@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
                         AlertDialog.Builder(this)
                             .setMessage("Définir \"%s\" comme url de démarrage ?".format(newUrl))
                             .setPositiveButton("Oui") { _, _ ->
-                                prefs.edit().putString("start_url", newUrl).commit()
+                                prefs.edit().putString("start_url", newUrl).apply()
                                 finish();
                                 startActivity(intent);
                             }
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             AlertDialog.Builder(this)
                 .setMessage("Effacer url de démarrage ?")
                 .setPositiveButton("Oui") { _, _ ->
-                    prefs.edit().remove("start_url").commit()
+                    prefs.edit().remove("start_url").apply()
                     finish();
                     startActivity(intent);
                 }

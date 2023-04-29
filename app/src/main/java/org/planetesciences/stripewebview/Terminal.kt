@@ -147,7 +147,7 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
             })
         } catch (e: Exception) {
             Log.e(LOG_TAG, "init exception", e)
-            status("Error: %s".format(e.message))
+            status("Erreur: %s".format(e.message))
         }
     }
 
@@ -196,18 +196,26 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
                                         var data = paymentIntent.id
                                         if(paymentIntent.getCharges().isNotEmpty()) data = paymentIntent.getCharges()[0].id
                                         Log.i(LOG_TAG, "processPayment success! $data")
-                                        activity.binding.webview.evaluateJavascript("$callbackJsFunction('$uid', '$data')") {}
+                                        activity.binding.webview.evaluateJavascript("$callbackJsFunction('$uid', true, '$data')") {}
                                     }
                                 }
 
                                 override fun onFailure(e: TerminalException) {
                                     Log.w(LOG_TAG,"processPayment failed!", e)
+                                    status("Erreur: %s".format(e.message))
+                                    activity.runOnUiThread {
+                                        activity.binding.webview.evaluateJavascript("$callbackJsFunction('$uid', false, 'Paiement refusé')") {}
+                                    }
                                 }
                             } )
                         }
 
                         override fun onFailure(e: TerminalException) {
                             Log.w(LOG_TAG,"collectPaymentMethod failed!", e)
+                            status("Erreur: %s".format(e.message))
+                            activity.runOnUiThread {
+                                activity.binding.webview.evaluateJavascript("$callbackJsFunction('$uid', false, 'Carte refusée')") {}
+                            }
                             getInstance().cancelPaymentIntent(paymentIntent, object : PaymentIntentCallback {
                                 override fun onFailure(e: TerminalException) {
                                     Log.w(LOG_TAG,"cancelPaymentIntent failed!", e)
@@ -223,7 +231,10 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
 
             override fun onFailure(e: TerminalException) {
                 Log.w(LOG_TAG,"createPaymentIntent failed!", e)
-                status("Impossible de créer le paiement.")
+                status("Erreur interne: %s".format(e.message))
+                activity.runOnUiThread {
+                    activity.binding.webview.evaluateJavascript("$callbackJsFunction('$uid', false, 'Erreur interne')") {}
+                }
             }
         })
 

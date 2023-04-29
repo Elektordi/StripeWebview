@@ -42,7 +42,7 @@
             app.pushToken("pst_test_yyy_zzz");
         }
         
-        function callback_pay(uid, data){
+        function callback_pay(uid, success, data){
             document.getElementById("pay_callback").innerHTML = data;
             app.makeToast(data, true);
         }

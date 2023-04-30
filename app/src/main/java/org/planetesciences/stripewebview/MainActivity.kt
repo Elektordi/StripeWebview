@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.webview.settings.javaScriptEnabled = true
         binding.webview.settings.domStorageEnabled = true
+        binding.webview.settings.loadWithOverviewMode = true
+        binding.webview.settings.useWideViewPort = true
         binding.webview.addJavascriptInterface(WebViewJavaScriptInterface(this@MainActivity), "app")
         binding.webview.webChromeClient = WebChromeClient()
         val url = prefs.getString("start_url", null)

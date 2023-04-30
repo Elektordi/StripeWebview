@@ -61,11 +61,12 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
         }
 
         override fun onReportReaderEvent(event: ReaderEvent) {
-            status("Terminal: Évènement %s".format(event.toString()))
+            //status("Terminal: Évènement %s".format(event.toString()))
         }
 
         override fun onRequestReaderInput(options: ReaderInputOptions) {
-            status("Terminal: Insérez %s".format(options.toString()))
+            //status("Terminal: Insérez %s".format(options.toString()))
+            status("Insérez ou présentez carte au terminal.")
         }
 
         override fun onRequestReaderDisplayMessage(message: ReaderDisplayMessage) {
@@ -176,6 +177,9 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
     fun startPayment(amount: Long, uid: String, callbackJsFunction: String) {
         if(connectedreader == null) {
             status("Terminal non connecté !")
+            activity.runOnUiThread {
+                activity.binding.webview.evaluateJavascript("$callbackJsFunction('$uid', false, 'Terminal non connecté')") {}
+            }
             return
         }
 

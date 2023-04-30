@@ -4,18 +4,21 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.Build
 import android.os.Bundle
 import android.webkit.WebChromeClient
-import androidx.annotation.RequiresApi
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+import io.github.g00fy2.quickie.QRResult
+import io.github.g00fy2.quickie.ScanQRCode
+
 import org.planetesciences.stripewebview.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
     lateinit var prefs: SharedPreferences
+
+    val scanner = registerForActivityResult(ScanQRCode(), ::scannerCallbackHandler)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         prefs = getSharedPreferences(packageName + "_preferences", Context.MODE_PRIVATE)
@@ -40,22 +43,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.settings.setOnClickListener {
-            val scanner = GmsBarcodeScanning.getClient(this)
-            scanner.startScan()
-                .addOnSuccessListener { barcode ->
-                    val newUrl = barcode.url?.url
-                    if(newUrl != null) {
-                        AlertDialog.Builder(this)
-                            .setMessage("Définir \"%s\" comme url de démarrage ?".format(newUrl))
-                            .setPositiveButton("Oui") { _, _ ->
-                                prefs.edit().putString("start_url", newUrl).apply()
-                                finish();
-                                startActivity(intent);
-                            }
-                            .setNegativeButton("Non", null)
-                            .show()
-                    }
-                }
+            scanner.launch(null)
         }
 
         binding.settings.setOnLongClickListener {
@@ -63,8 +51,8 @@ class MainActivity : AppCompatActivity() {
                 .setMessage("Effacer url de démarrage ?")
                 .setPositiveButton("Oui") { _, _ ->
                     prefs.edit().remove("start_url").apply()
-                    finish();
-                    startActivity(intent);
+                    finish()
+                    startActivity(intent)
                 }
                 .setNegativeButton("Non", null)
                 .show()
@@ -81,5 +69,23 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.BLUETOOTH_CONNECT,
             Manifest.permission.BLUETOOTH_SCAN
         ), 1)
+    }
+
+    private fun scannerCallbackHandler(result: QRResult) {
+        if(result is QRResult.QRSuccess) {
+            val newUrl = result.content.rawValue
+            AlertDialog.Builder(this)
+                .setMessage("Définir \"%s\" comme url de démarrage ?".format(newUrl))
+                .setPositiveButton("Oui") { _, _ ->
+                    prefs.edit().putString("start_url", newUrl).apply()
+                    finish()
+                    startActivity(intent)
+                }
+                .setNegativeButton("Non", null)
+                .show()
+
+        } else if(result is QRResult.QRError) {
+            Toast.makeText(this, result.exception.toString(), Toast.LENGTH_LONG).show()
+        }
     }
 }

@@ -3,10 +3,14 @@ package org.planetesciences.stripewebview
 import android.view.View
 import android.webkit.JavascriptInterface
 import android.widget.Toast
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+import io.github.g00fy2.quickie.QRResult
+import io.github.g00fy2.quickie.ScanQRCode
 
 class WebViewJavaScriptInterface(private var activity: MainActivity) {
     var terminal: Terminal? = null
+
+    val scanner = activity.registerForActivityResult(ScanQRCode(), ::scannerCallbackHandler)
+    var scanner_callback_js_function: String? = null
 
     @JavascriptInterface
     fun makeToast(message: String, lengthLong: Boolean) {
@@ -45,13 +49,16 @@ class WebViewJavaScriptInterface(private var activity: MainActivity) {
     @JavascriptInterface
     fun scanQrCode(callback_js_function: String) {
         if(callback_js_function == "") return
-        val scanner = GmsBarcodeScanning.getClient(activity)
-        scanner.startScan()
-            .addOnSuccessListener { barcode ->
-                val data = barcode.rawValue!!.replace("'", "\'")
-                activity.runOnUiThread {
-                    activity.binding.webview.evaluateJavascript("$callback_js_function('$data')") {}
-                }
+        scanner_callback_js_function = callback_js_function
+        scanner.launch(null)
+    }
+
+    private fun scannerCallbackHandler(result: QRResult) {
+        if(result is QRResult.QRSuccess) {
+            val data = result.content.rawValue.replace("'", "\'")
+            activity.runOnUiThread {
+                activity.binding.webview.evaluateJavascript("$scanner_callback_js_function('$data')") {}
             }
+        }
     }
 }

@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "org.planetesciences.stripewebview"
-        minSdk 31
+        minSdk 29
         targetSdk 32
         versionCode 1
         versionName "1.0"
@@ -40,8 +40,8 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.android.material:material:1.7.0'
-    implementation 'com.google.android.gms:play-services-code-scanner:16.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'io.github.g00fy2.quickie:quickie-bundled:1.5.2'
     implementation 'com.stripe:stripeterminal:2.17.0'
 
     testImplementation 'junit:junit:4.13.2'

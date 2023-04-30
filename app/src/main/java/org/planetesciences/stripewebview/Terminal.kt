@@ -183,6 +183,7 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
             .setAmount(amount)
             .setCurrency("eur")
             .setDescription(uid)
+            .setCaptureMethod(CaptureMethod.Automatic)
             .build()
         getInstance().createPaymentIntent(params, object: PaymentIntentCallback {
             override fun onSuccess(paymentIntent: PaymentIntent) {

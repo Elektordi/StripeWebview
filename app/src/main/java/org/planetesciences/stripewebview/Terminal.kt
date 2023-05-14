@@ -87,6 +87,11 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
         }
     }
 
+    fun isReady(): Boolean {
+        if(connectedreader == null) return false
+        return true // ((connectedreader!!.batteryLevel ?: 0f) > 0f)
+    }
+
     fun status(message: String) {
         activity.runOnUiThread {
             Toast.makeText(activity, message, Toast.LENGTH_LONG).show()

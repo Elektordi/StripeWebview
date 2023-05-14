@@ -28,6 +28,12 @@ class WebViewJavaScriptInterface(private var activity: MainActivity) {
     }
 
     @JavascriptInterface
+    fun isStripeReady(): Boolean {
+        if(terminal == null) return false
+        return terminal!!.isReady()
+    }
+
+    @JavascriptInterface
     fun pushToken(token: String) {
         if(terminal == null) return
         terminal!!.pushToken(token)

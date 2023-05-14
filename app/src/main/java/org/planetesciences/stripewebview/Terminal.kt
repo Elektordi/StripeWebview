@@ -12,8 +12,10 @@ const val SIMULATED = false
 
 class Terminal(var activity: MainActivity, var location: String, var token_js_function: String) {
 
-    private var search: Cancelable? = null
-    private var connectedreader: Reader? = null
+    companion object {
+        private var search: Cancelable? = null
+        private var connectedreader: Reader? = null
+    }
     private var cancelable: Cancelable? = null
     private var tokenCallback: ConnectionTokenCallback? = null
 
@@ -37,6 +39,7 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
     private val listener = object : TerminalListener {
         override fun onUnexpectedReaderDisconnect(reader: Reader) {
             status("Terminal déconnecté !")
+            connectedreader = null
         }
     }
 
@@ -112,6 +115,36 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
                 discoveryMethod = DiscoveryMethod.BLUETOOTH_SCAN,
             )
 
+            if(search != null && !search!!.isCompleted) {
+                search!!.cancel(object: Callback {
+                    override fun onFailure(e: TerminalException) {
+                        Log.e(LOG_TAG, "init cancel search exception", e)
+                        status("Avertissement: %s".format(e.message))
+                    }
+                    override fun onSuccess() {
+                        Log.i(LOG_TAG, "init cancel search success")
+                    }
+                })
+                status("Recherche abandonnée.")
+                search = null
+                return
+            }
+            if(connectedreader != null) {
+                getInstance().disconnectReader(object: Callback {
+                    override fun onFailure(e: TerminalException) {
+                        Log.e(LOG_TAG, "disconnectReader exception", e)
+                        status("Avertissement: %s".format(e.message))
+                        connectedreader = null
+                    }
+                    override fun onSuccess() {
+                        status("Déconnexion du terminal réussie !")
+                        connectedreader = null
+                    }
+                })
+                status("Déconnexion du terminal en cours...")
+                return
+            }
+
             var dialog: AlertDialog? = null
             status("Recherche de terminaux en cours")
             search = getInstance().discoverReaders(config, object : DiscoveryListener {
@@ -133,8 +166,10 @@ class Terminal(var activity: MainActivity, var location: String, var token_js_fu
                             .setNegativeButton("Annuler") { _, _ ->
                                 search!!.cancel(object: Callback {
                                     override fun onFailure(e: TerminalException) {
+                                        Log.e(LOG_TAG, "cancel search exception", e)
                                     }
                                     override fun onSuccess() {
+                                        Log.i(LOG_TAG, "cancel search success")
                                     }
                                 })
                             }

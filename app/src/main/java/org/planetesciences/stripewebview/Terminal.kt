@@ -10,7 +10,7 @@ import com.stripe.stripeterminal.log.LogLevel
 const val LOG_TAG = "Terminal"
 const val SIMULATED = false
 
-class Terminal(var activity: MainActivity, var location: String, var token_js_function: String) {
+class Terminal(val activity: MainActivity, val location: String, val token_js_function: String) {
 
     companion object {
         private var search: Cancelable? = null

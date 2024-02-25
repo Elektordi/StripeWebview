@@ -8,6 +8,7 @@ import io.github.g00fy2.quickie.ScanQRCode
 
 class WebViewJavaScriptInterface(private var activity: MainActivity) {
     var terminal: Terminal? = null
+    var printer: Printer? = null
 
     val scanner = activity.registerForActivityResult(ScanQRCode(), ::scannerCallbackHandler)
     var scanner_callback_js_function: String? = null
@@ -66,5 +67,18 @@ class WebViewJavaScriptInterface(private var activity: MainActivity) {
                 activity.binding.webview.evaluateJavascript("$scanner_callback_js_function('$data')") {}
             }
         }
+    }
+
+    @JavascriptInterface
+    fun initPrinter(target: String) {
+        if(target == "") return
+        printer = Printer(activity, target)
+        printer!!.init()
+    }
+
+    @JavascriptInterface
+    fun printTicket(ticket: String) {
+        if(printer == null) return
+        printer!!.print(ticket)
     }
 }

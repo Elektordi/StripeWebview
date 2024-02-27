@@ -40,24 +40,28 @@ class Printer(val activity: MainActivity, val target: String) {
         @SuppressLint("MissingPermission")
         override fun run() {
             try {
-                if (target.contains(":")) {
-                    // IP:PORT
+                val parts = target.split(":").size
+                if (parts == 2) {
+                    // TCP host (IP:PORT)
                     val hostport = target.split(":")
                     val socket = Socket(hostport[0], hostport[1].toInt())
                     socket.outputStream.write(ticket.encodeToByteArray())
-                    socket.outputStream.flush()
                     socket.close()
-                } else {
-                    // Bluetooth MAC
+                } else if(parts == 6) {
+                    // Bluetooth MAC (AA:BB:CC:DD:EE:FF)
                     val btadapter = (activity.baseContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
                     btadapter.cancelDiscovery()
                     val btdev = btadapter.getRemoteDevice(target)
                     val uuid = UUID.fromString(SPP_UUID)
                     val btsock = btdev.createRfcommSocketToServiceRecord(uuid)
                     btsock.connect()
+                    Thread.sleep(100)
                     btsock.outputStream.write(ticket.encodeToByteArray())
-                    btsock.outputStream.flush()
                     btsock.close()
+                } else {
+                    Log.w(PRINTER_LOG_TAG, "Invalid printer target: %s".format(target))
+                    status("Imprimante invalide.")
+                    return
                 }
                 status("Impression OK !")
 

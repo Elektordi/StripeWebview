@@ -1,14 +1,10 @@
 package org.planetesciences.stripewebview
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import java.io.PrintWriter
 import java.net.Socket
 import java.util.*
 
@@ -26,17 +22,17 @@ class Printer(val activity: MainActivity, val target: String) {
         // TODO: List dialog like terminals...
     }
 
-    fun print(ticket: String) {
+    fun print(bytes: ByteArray) {
         if(thread != null && thread!!.isAlive) {
             status("Une impression est déjà en cours !")
             return
         }
         status("Impression envoyée...")
-        thread = PrintThread(ticket)
+        thread = PrintThread(bytes)
         thread!!.start()
     }
 
-    private inner class PrintThread(val ticket: String) : Thread() {
+    private inner class PrintThread(val bytes: ByteArray) : Thread() {
         @SuppressLint("MissingPermission")
         override fun run() {
             try {
@@ -45,7 +41,7 @@ class Printer(val activity: MainActivity, val target: String) {
                     // TCP host (IP:PORT)
                     val hostport = target.split(":")
                     val socket = Socket(hostport[0], hostport[1].toInt())
-                    socket.outputStream.write(ticket.encodeToByteArray())
+                    socket.outputStream.write(bytes)
                     socket.close()
                 } else if(parts == 6) {
                     // Bluetooth MAC (AA:BB:CC:DD:EE:FF)
@@ -55,8 +51,8 @@ class Printer(val activity: MainActivity, val target: String) {
                     val uuid = UUID.fromString(SPP_UUID)
                     val btsock = btdev.createRfcommSocketToServiceRecord(uuid)
                     btsock.connect()
-                    Thread.sleep(100)
-                    btsock.outputStream.write(ticket.encodeToByteArray())
+                    sleep(100)
+                    btsock.outputStream.write(bytes)
                     btsock.close()
                 } else {
                     Log.w(PRINTER_LOG_TAG, "Invalid printer target: %s".format(target))

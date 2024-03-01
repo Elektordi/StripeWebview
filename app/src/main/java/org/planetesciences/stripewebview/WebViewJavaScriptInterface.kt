@@ -77,8 +77,8 @@ class WebViewJavaScriptInterface(private var activity: MainActivity) {
     }
 
     @JavascriptInterface
-    fun printTicket(ticket: String) {
+    fun printTicket(bytes: ByteArray) {
         if(printer == null) return
-        printer!!.print(ticket)
+        printer!!.print(bytes)
     }
 }

@@ -108,13 +108,9 @@ class Terminal(val activity: MainActivity, val location: String, val token_js_fu
         return com.stripe.stripeterminal.Terminal.getInstance()
     }
 
-    fun init() {
+    fun init(): Boolean {
         try {
-            val config = DiscoveryConfiguration(
-                isSimulated = SIMULATED,
-                discoveryMethod = DiscoveryMethod.BLUETOOTH_SCAN,
-            )
-
+            if(connectedreader != null) return false
             if(search != null && !search!!.isCompleted) {
                 search!!.cancel(object: Callback {
                     override fun onFailure(e: TerminalException) {
@@ -122,28 +118,17 @@ class Terminal(val activity: MainActivity, val location: String, val token_js_fu
                         status("Avertissement: %s".format(e.message))
                     }
                     override fun onSuccess() {
-                        Log.i(LOG_TAG, "init cancel search success")
+                        search = null
+                        init()
                     }
                 })
-                status("Recherche abandonnée.")
-                search = null
-                return
+                return true
             }
-            if(connectedreader != null) {
-                getInstance().disconnectReader(object: Callback {
-                    override fun onFailure(e: TerminalException) {
-                        Log.e(LOG_TAG, "disconnectReader exception", e)
-                        status("Avertissement: %s".format(e.message))
-                        connectedreader = null
-                    }
-                    override fun onSuccess() {
-                        status("Déconnexion du terminal réussie !")
-                        connectedreader = null
-                    }
-                })
-                status("Déconnexion du terminal en cours...")
-                return
-            }
+
+            val config = DiscoveryConfiguration(
+                isSimulated = SIMULATED,
+                discoveryMethod = DiscoveryMethod.BLUETOOTH_SCAN,
+            )
 
             var dialog: AlertDialog? = null
             status("Recherche de terminaux en cours")
@@ -186,10 +171,45 @@ class Terminal(val activity: MainActivity, val location: String, val token_js_fu
                     status("Échec de la recherche des terminaux !")
                 }
             })
+            return true
         } catch (e: Exception) {
             Log.e(LOG_TAG, "init exception", e)
             status("Erreur: %s".format(e.message))
         }
+        return false
+    }
+
+    fun stop(): Boolean {
+        if(search != null && !search!!.isCompleted) {
+            search!!.cancel(object: Callback {
+                override fun onFailure(e: TerminalException) {
+                    Log.e(LOG_TAG, "init cancel search exception", e)
+                    status("Avertissement: %s".format(e.message))
+                }
+                override fun onSuccess() {
+                    Log.i(LOG_TAG, "init cancel search success")
+                }
+            })
+            status("Recherche abandonnée.")
+            search = null
+            return true
+        }
+        if(connectedreader != null) {
+            getInstance().disconnectReader(object: Callback {
+                override fun onFailure(e: TerminalException) {
+                    Log.e(LOG_TAG, "disconnectReader exception", e)
+                    status("Avertissement: %s".format(e.message))
+                    connectedreader = null
+                }
+                override fun onSuccess() {
+                    status("Déconnexion du terminal réussie !")
+                    connectedreader = null
+                }
+            })
+            status("Déconnexion du terminal en cours...")
+            return true
+        }
+        return false
     }
 
     private fun connect(reader: Reader) {

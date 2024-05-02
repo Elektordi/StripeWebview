@@ -19,13 +19,20 @@ class WebViewJavaScriptInterface(private var activity: MainActivity) {
     }
 
     @JavascriptInterface
-    fun initStripe(location: String, token_js_function: String) {
-        if(location == "" || token_js_function == "") return
-        terminal = Terminal(activity, location, token_js_function)
-        terminal!!.init()
+    fun initStripe(location: String, token_js_function: String): Boolean {
         activity.runOnUiThread {
             activity.binding.settings.visibility = View.GONE
         }
+        if(location == "" || token_js_function == "") return false
+        if(terminal != null && terminal!!.isReady()) return false
+        terminal = Terminal(activity, location, token_js_function)
+        return terminal!!.init()
+    }
+
+    @JavascriptInterface
+    fun stopStripe(): Boolean {
+        if(terminal == null) return false
+        return terminal!!.stop()
     }
 
     @JavascriptInterface

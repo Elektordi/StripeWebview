@@ -245,7 +245,7 @@ class Terminal(val activity: MainActivity, val location: String, val token_js_fu
 
         val params = PaymentIntentParameters.Builder()
             .setAmount(amount)
-            .setCurrency("eur")
+            .setCurrency("EUR")
             .setDescription(uid)
             .setCaptureMethod(CaptureMethod.Automatic)
             .build()

@@ -8,7 +8,7 @@ import android.widget.Toast
 import java.net.Socket
 import java.util.*
 
-const val PRINTER_LOG_TAG = "Printer"
+private const val LOG_TAG = "Printer"
 
 // From: https://developer.android.com/reference/android/bluetooth/BluetoothDevice
 // "If you are connecting to a Bluetooth serial board then try using the well-known SPP UUID 00001101-0000-1000-8000-00805F9B34FB."
@@ -55,14 +55,14 @@ class Printer(val activity: MainActivity, val target: String) {
                     btsock.outputStream.write(bytes)
                     btsock.close()
                 } else {
-                    Log.w(PRINTER_LOG_TAG, "Invalid printer target: %s".format(target))
+                    Log.w(LOG_TAG, "Invalid printer target: %s".format(target))
                     status("Imprimante invalide.")
                     return
                 }
                 status("Impression OK !")
 
             } catch (e: Exception) {
-                Log.e(PRINTER_LOG_TAG, "exception", e)
+                Log.e(LOG_TAG, "exception", e)
                 status("Erreur: %s".format(e.message))
             }
         }

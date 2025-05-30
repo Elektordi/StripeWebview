@@ -7,8 +7,8 @@ import com.stripe.stripeterminal.external.callable.*
 import com.stripe.stripeterminal.external.models.*
 import com.stripe.stripeterminal.log.LogLevel
 
-const val LOG_TAG = "Terminal"
-const val SIMULATED = false
+private const val LOG_TAG = "Terminal"
+private const val SIMULATED = false
 
 class Terminal(val activity: MainActivity, val location: String, val token_js_function: String) {
 
